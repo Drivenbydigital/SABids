@@ -29,7 +29,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .btn-clear{font-size:13px;padding:8px 14px;height:38px;background:transparent;border:.5px solid #ccc;border-radius:6px;cursor:pointer;color:#444;white-space:nowrap}
 /* Desktop table */
 .tbl-wrap{border:1px solid #e0e0db;border-radius:10px;overflow:hidden;background:#fff}
-table{width:100%;border-collapse:collapse;table-layout:fixed}
+table{width:100%;border-collapse:collapse}
 thead{background:#f8f8f6}
 th{padding:9px 10px;text-align:left;font-weight:500;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid #e5e5e0;cursor:pointer;user-select:none;white-space:nowrap}
 th.sorted{color:#1a3c5e}
@@ -125,8 +125,7 @@ tr:last-child td{border-bottom:none}
           <th onclick="doSort('agency')" id="th-agency">Agency / Program</th>
           <th onclick="doSort('status')" id="th-status">Status</th>
           <th onclick="doSort('type')" id="th-type">Type</th>
-          <th onclick="doSort('deadline')" id="th-deadline">Deadline</th>
-          <th>Actions</th>
+          <th>Portal</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -349,10 +348,11 @@ function render(){
       const dlExtra=days>=0&&days<=30?`<div class="dl-days" style="color:${urgent?"#854f0b":"#aaa"}">${days}d remaining</div>`:"";
       return `<tr>
         <td class="td-ref"><div class="ref">${b.ref}</div><div class="src">${meta.name}</div></td>
-        <td class="td-prog"><div class="prog" title="${b.program}">${b.program}</div><div class="dept">${b.dept||""}</div></td>
-        <td class="td-badges"><span class="badge ${sBadge}">${b.status}</span><span class="badge ${tClass(b.type)}">${b.type}</span></td>
-        <td class="td-dl" data-label="Deadline"><div class="dl${urgent?" urgent":""}">${fmtDate(b.deadline)}</div>${dlExtra}</td>
-        <td class="td-action"><a class="btn-bid" href="${meta.url}" target="_blank" rel="noopener">&#x2197; View Portal</a></td>
+        <td class="td-prog"><div class="prog" title="${b.program}"><a href="${meta.url}" target="_blank" rel="noopener" style="color:#1a3c5e;text-decoration:none">${b.program}</a></div><div class="dept">${b.dept||""}</div></td>
+        <td class="td-status"><span class="badge ${sBadge}">${b.status}</span></td>
+        <td class="td-type"><span class="badge ${tClass(b.type)}">${b.type}</span></td>
+        <td class="td-dl"><div class="dl${urgent?" urgent":""}">${fmtDate(b.deadline)}</div>${dlExtra}</td>
+        <td><a class="btn-bid" href="${meta.url}" target="_blank" rel="noopener">&#x2197; View Portal</a></td>
       </tr>`;
     }).join("");
   }
@@ -370,7 +370,8 @@ function render(){
   }
 }
 
-document.getElementById("th-deadline").classList.add("sorted");
+const thDl = document.getElementById("th-deadline");
+if(thDl) thDl.classList.add("sorted");
 render();
 </script>
 </body>
