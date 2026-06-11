@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SA GovBid Aggregator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;background:#f5f5f3;color:#1a1a18;min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto;padding:1.5rem 1.25rem}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:38px;height:38px;background:#1a3c5e;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0}
+.brand-name{font-weight:600;font-size:16px}
+.brand-sub{font-size:11px;color:#888;margin-top:1px}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;color:#666}
+.dot{width:7px;height:7px;background:#22c55e;border-radius:50%;display:inline-block}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+@media(max-width:600px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metric{background:#fff;border-radius:8px;padding:.9rem 1rem;border:.5px solid #e5e5e0}
+.metric-label{font-size:11px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.metric-val{font-size:22px;font-weight:600;color:#1a1a18}
+.metric-sub{font-size:11px;color:#aaa;margin-top:2px}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.pill{font-size:11px;padding:3px 10px;border-radius:99px;border:.5px solid #ddd;background:transparent;color:#666;cursor:pointer;white-space:nowrap}
+.pill.active{background:#1a3c5e;color:#fff;border-color:#1a3c5e}
+.pill:hover:not(.active){background:#f0f0ee}
+.filters{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.filters input,.filters select{font-size:13px;padding:6px 10px;height:34px;border:.5px solid #ccc;border-radius:6px;background:#fff;color:#1a1a18;outline:none}
+.filters input{flex:1;min-width:200px}
+.filters input:focus,.filters select:focus{border-color:#1a3c5e}
+.btn-clear{font-size:12px;padding:5px 12px;height:34px;background:transparent;border:.5px solid #ccc;border-radius:6px;cursor:pointer;color:#444}
+.btn-clear:hover{background:#f0f0ee}
+.tbl-wrap{border:.5px solid #e0e0db;border-radius:10px;overflow:hidden;background:#fff}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+colgroup .c-ref{width:130px}
+colgroup .c-status{width:90px}
+colgroup .c-type{width:75px}
+colgroup .c-deadline{width:108px}
+colgroup .c-action{width:150px}
+thead{background:#f8f8f6}
+th{padding:9px 10px;text-align:left;font-weight:500;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid #e5e5e0;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:#1a1a18}
+th.sorted{color:#1a3c5e}
+td{padding:10px 10px;border-bottom:.5px solid #f0f0ec;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8}
+.ref{font-family:'SF Mono',Monaco,monospace;font-size:11px;color:#1a3c5e;font-weight:500;word-break:break-all}
+.src{font-size:10px;color:#aaa;margin-top:2px}
+.prog{font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dept{font-size:11px;color:#888;margin-top:1px}
+.badge{display:inline-block;padding:2px 7px;border-radius:99px;font-size:11px;font-weight:500;white-space:nowrap}
+.s-open{background:#eaf3de;color:#3b6d11}
+.s-closing{background:#faeeda;color:#854f0b}
+.s-awarded{background:#f1efe8;color:#5f5e5a}
+.t-IFB{background:#e6f1fb;color:#185fa5}
+.t-RFP{background:#eeedfe;color:#534ab7}
+.t-RFO{background:#eaf3de;color:#3b6d11}
+.t-RFQ{background:#faeeda;color:#854f0b}
+.t-RFQS{background:#fbeaf0;color:#993556}
+.t-RCSP,.t-RFCSP{background:#e1f5ee;color:#0f6e56}
+.t-other{background:#f1efe8;color:#888}
+.dl{font-size:12px;color:#666;white-space:nowrap}
+.dl.urgent{color:#854f0b;font-weight:500}
+.dl-days{font-size:10px;margin-top:1px}
+.actions{display:flex;gap:5px}
+.btn-bid{font-size:11px;padding:4px 9px;background:#1a3c5e;color:#fff;border-radius:5px;text-decoration:none;white-space:nowrap;border:none;cursor:pointer}
+.btn-bid:hover{background:#163352}
+.btn-portal{font-size:11px;padding:4px 8px;background:transparent;color:#444;border:.5px solid #ccc;border-radius:5px;text-decoration:none;white-space:nowrap}
+.btn-portal:hover{background:#f0f0ee}
+.footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:12px;color:#888;flex-wrap:wrap;gap:8px}
+.pagination{display:flex;gap:4px}
+.pg{padding:3px 9px;border:.5px solid #ddd;border-radius:5px;background:transparent;cursor:pointer;font-size:12px;color:#666}
+.pg.active{background:#1a3c5e;color:#fff;border-color:#1a3c5e}
+.pg:hover:not(.active){background:#f0f0ee}
+.empty{text-align:center;padding:3rem;color:#aaa}
+.updated{font-size:11px;color:#aaa;text-align:right;margin-bottom:.5rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="updated">Last updated: June 11, 2026 &nbsp;·&nbsp; 12 portals &nbsp;·&nbsp; <a href="mailto:dst-purchasing@alamo.edu" style="color:#1a3c5e;text-decoration:none">Contact</a></p>
+
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">&#127981;</div>
+      <div>
+        <div class="brand-name">SA GovBid Aggregator</div>
+        <div class="brand-sub">San Antonio metro &middot; 12 procurement portals</div>
+      </div>
+    </div>
+    <div class="live-badge"><span class="dot"></span>86 active solicitations &mdash; refreshed weekly</div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Active Bids</div><div class="metric-val" id="m-active">—</div><div class="metric-sub">open solicitations</div></div>
+    <div class="metric"><div class="metric-label">Closing ≤7 Days</div><div class="metric-val" id="m-closing">—</div><div class="metric-sub">urgent — act now</div></div>
+    <div class="metric"><div class="metric-label">Portals Covered</div><div class="metric-val">12</div><div class="metric-sub">SA area agencies</div></div>
+    <div class="metric"><div class="metric-label">Total Loaded</div><div class="metric-val">86</div><div class="metric-sub">as of June 11, 2026</div></div>
+  </div>
+
+  <div class="pills" id="pills"></div>
+
+  <div class="filters">
+    <input type="text" id="search" placeholder="Search by keyword, agency, ref #, department…" oninput="render()"/>
+    <select id="sf-status" onchange="render()">
+      <option value="">All statuses</option>
+      <option>Open</option><option>Closing Soon</option><option>Awarded</option>
+    </select>
+    <select id="sf-type" onchange="render()"></select>
+    <button class="btn-clear" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <colgroup><col class="c-ref"/><col/><col class="c-status"/><col class="c-type"/><col class="c-deadline"/><col class="c-action"/></colgroup>
+      <thead>
+        <tr>
+          <th onclick="doSort('ref')" id="th-ref">Ref #</th>
+          <th onclick="doSort('agency')" id="th-agency">Agency / Program</th>
+          <th onclick="doSort('status')" id="th-status">Status</th>
+          <th onclick="doSort('type')" id="th-type">Type</th>
+          <th onclick="doSort('deadline')" id="th-deadline">Deadline</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="footer">
+    <span id="count-lbl"></span>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<script>
+const SOURCE_META={
+  cosa:   {name:"City of San Antonio",       url:"https://webapp1.sanantonio.gov/BidContractOpps/Default.aspx"},
+  alamo:  {name:"Alamo Colleges District",   url:"https://www.alamo.edu/about-us/offices-departments/departments/purchasing/"},
+  uhealth:{name:"University Health",         url:"https://universityhealth.bonfirehub.com/portal/?tab=openOpportunities"},
+  bexar:  {name:"Bexar County",              url:"https://bexarprod-lm01.cloud.infor.com:1442/lmscm/SourcingSupplier/list/SourcingEvent.OpenForBid"},
+  cps:    {name:"CPS Energy",                url:"https://cpsenergy.sbecompliance.com/"},
+  eaa:    {name:"Edwards Aquifer Authority", url:"https://www.bidnetdirect.com/texas/edwardsaquiferauthority"},
+  homesa: {name:"Opportunity Home SA",       url:"https://homesa.bonfirehub.com/portal/?tab=openOpportunities"},
+  sara:   {name:"San Antonio River Auth.",   url:"https://sara-tx.bonfirehub.com/portal/?tab=openOpportunities"},
+  saws:   {name:"SAWS",                      url:"https://apps.saws.org/business_center/contractsol/"},
+  uthscsa:{name:"UT Health San Antonio",     url:"https://uthscsa.bonfirehub.com/portal/?tab=openOpportunities"},
+  utsa:   {name:"UTSA",                      url:"https://bids.sciquest.com/apps/Router/PublicEvent?CustomerOrg=UTSA"},
+  via:    {name:"VIA Metro Transit",         url:"https://via.sbecompliance.com/FrontEnd/ProposalSearchPublic.asp?TN=via&XID=2006"},
+};
+const RAW=[
+  {id:"cosa-1",ref:"6100019565",agency:"City of San Antonio",program:"Employee Engagement Survey Plan",type:"RFP",dept:"Human Resources",deadline:"2026-06-11",source:"cosa"},
+  {id:"cosa-2",ref:"6100019501",agency:"City of San Antonio",program:"Promotional T-Shirts",type:"IFB",dept:"Finance",deadline:"2026-06-12",source:"cosa"},
+  {id:"cosa-3",ref:"6100019181",agency:"City of San Antonio",program:"Medical Supplies and Pharmaceuticals",type:"RFO",dept:"Finance",deadline:"2026-06-12",source:"cosa"},
+  {id:"cosa-4",ref:"6100019182",agency:"City of San Antonio",program:"Purchase of Medical Supplies and Equipment",type:"RFO",dept:"Fire",deadline:"2026-06-12",source:"cosa"},
+  {id:"cosa-5",ref:"6100019297",agency:"City of San Antonio",program:"Annual Contract for Cummins Engine Parts",type:"IFB",dept:"Solid Waste Management",deadline:"2026-06-12",source:"cosa"},
+  {id:"cosa-6",ref:"6100019666",agency:"City of San Antonio",program:"Public Safety Response Vehicles",type:"RFO",dept:"Fire",deadline:"2026-06-12",source:"cosa"},
+  {id:"cosa-7",ref:"6100019589",agency:"City of San Antonio",program:"Fitness Equipment Preventive Maintenance & Repair",type:"IFB",dept:"Fire",deadline:"2026-06-12",source:"cosa"},
+  {id:"cosa-8",ref:"6100019696",agency:"City of San Antonio",program:"ADA Shuttle Buses",type:"IFB",dept:"BES",deadline:"2026-06-12",source:"cosa"},
+  {id:"cosa-9",ref:"6100019662",agency:"City of San Antonio",program:"Parts and Service for Toyota Vehicles",type:"IFB",dept:"BES",deadline:"2026-06-15",source:"cosa"},
+  {id:"cosa-10",ref:"6100019674",agency:"City of San Antonio",program:"Parts for New Way Refuse Trucks",type:"IFB",dept:"Solid Waste Management",deadline:"2026-06-15",source:"cosa"},
+  {id:"cosa-11",ref:"6100019616",agency:"City of San Antonio",program:"Carpet and Upholstery Cleaning",type:"IFB",dept:"BES",deadline:"2026-06-15",source:"cosa"},
+  {id:"cosa-12",ref:"6100019701",agency:"City of San Antonio",program:"FY26 Medium & Heavy-Duty Trucks",type:"IFB",dept:"BES",deadline:"2026-06-15",source:"cosa"},
+  {id:"cosa-13",ref:"6100019521",agency:"City of San Antonio",program:"Temporary Staffing Services",type:"RFP",dept:"Human Resources",deadline:"2026-06-15",source:"cosa"},
+  {id:"cosa-14",ref:"6100019587",agency:"City of San Antonio",program:"Nutritional Services",type:"RFP",dept:"Pre-K 4 SA",deadline:"2026-06-15",source:"cosa"},
+  {id:"cosa-15",ref:"6100019625",agency:"City of San Antonio",program:"Library Indoor Specialty Furniture & Services",type:"RCSP",dept:"Library",deadline:"2026-06-15",source:"cosa"},
+  {id:"cosa-16",ref:"6100019643",agency:"City of San Antonio",program:"Traffic Control Services",type:"RCSP",dept:"Convention & Entertainment",deadline:"2026-06-16",source:"cosa"},
+  {id:"cosa-17",ref:"6100019162",agency:"City of San Antonio",program:"Sprinkler System Inspection",type:"IFB",dept:"Fire",deadline:"2026-06-17",source:"cosa"},
+  {id:"cosa-18",ref:"6100019423",agency:"City of San Antonio",program:"Water Bottle Services",type:"IFB",dept:"Finance",deadline:"2026-06-17",source:"cosa"},
+  {id:"cosa-19",ref:"6100019614",agency:"City of San Antonio",program:"Library Shelving Services (Annual Contract)",type:"RCSP",dept:"Library",deadline:"2026-06-22",source:"cosa"},
+  {id:"cosa-20",ref:"23-03899",agency:"City of San Antonio",program:"Dorsey Drive Reconstruction (2022 Bond)",type:"IFB",dept:"Capital Delivery",deadline:"2026-06-23",source:"cosa"},
+  {id:"alamo-1",ref:"RFQS 2026-0090",agency:"Alamo Colleges District",program:"Purchase of Construction Manager at Risk (CMAR) Services",type:"RFQS",dept:"Construction Services",deadline:"2026-06-16",source:"alamo"},
+  {id:"alamo-2",ref:"RFP 2026-0093",agency:"Alamo Colleges District",program:"Construction Audit Services",type:"RFP",dept:"Purchasing",deadline:"2026-07-03",source:"alamo"},
+  {id:"uh-1",ref:"RFCSP-226-05-076-CNST",agency:"University Health",program:"Infusion Clinic Expansion",type:"RFCSP",dept:"Planning, Design & Construction",deadline:"2026-06-29",source:"uhealth"},
+  {id:"uh-2",ref:"RFP-226-03-067-SVC",agency:"University Health",program:"Facilities Condition Assessment",type:"RFP",dept:"Facilities Management",deadline:"2026-07-09",source:"uhealth"},
+  {id:"bexar-1",ref:"1192",agency:"Bexar County",program:"Custodial Services",type:"RFP",dept:"Purchasing",deadline:"2026-07-09",source:"bexar"},
+  {id:"bexar-2",ref:"1227",agency:"Bexar County",program:"Fresh Food and Beverage Vending Machine",type:"RFP",dept:"Purchasing",deadline:"2026-07-08",source:"bexar"},
+  {id:"bexar-3",ref:"1251",agency:"Bexar County",program:"Infor Financials v10 On-Demand Support",type:"RFQ",dept:"IT",deadline:"2026-06-18",source:"bexar"},
+  {id:"bexar-4",ref:"1252",agency:"Bexar County",program:"Janitorial and Personal Care Items",type:"IFB",dept:"Purchasing",deadline:"2026-08-20",source:"bexar"},
+  {id:"bexar-5",ref:"1254",agency:"Bexar County",program:"South San Civic Center Design and Construction",type:"RFQ",dept:"Facilities",deadline:"2026-06-12",source:"bexar"},
+  {id:"bexar-6",ref:"1256",agency:"Bexar County",program:"Bexar County SOC — Community Health",type:"RFP",dept:"Health",deadline:"2026-06-29",source:"bexar"},
+  {id:"civ-1",ref:"—",agency:"Bexar County (CIVCAST)",program:"Bulverde Rd Street Reconstruction (Green Spring Dr to Redland Rd)",type:"IFB",dept:"Public Works",deadline:"2026-07-14",source:"bexar"},
+  {id:"civ-2",ref:"—",agency:"Bexar County (CIVCAST)",program:"RFQ On Call Professional Consultant Services for Planning, Design & Engineering",type:"RFQ",dept:"Public Works",deadline:"2026-07-10",source:"bexar"},
+  {id:"civ-3",ref:"—",agency:"Bexar County (CIVCAST)",program:"EARZ Wild Springs Sewer Main Replacement Project",type:"IFB",dept:"Public Works",deadline:"2026-07-09",source:"bexar"},
+  {id:"civ-4",ref:"—",agency:"Bexar County (CIVCAST)",program:"Design Services for Midcrown Multi-Generational Center and Park",type:"RFP",dept:"Public Works",deadline:"2026-07-01",source:"bexar"},
+  {id:"civ-5",ref:"—",agency:"Bexar County (CIVCAST)",program:"N. Frio Bike and Pedestrian Improvements (IH-10 to Houston St.)",type:"IFB",dept:"Public Works",deadline:"2026-06-30",source:"bexar"},
+  {id:"civ-6",ref:"—",agency:"Bexar County (CIVCAST)",program:"Well Site No. 9 Ground Storage Tank Rehabilitation",type:"RFP",dept:"Public Works",deadline:"2026-06-24",source:"bexar"},
+  {id:"civ-7",ref:"—",agency:"Bexar County (CIVCAST)",program:"FY25-26 Pavement Marking Services",type:"IFB",dept:"Public Works",deadline:"2026-06-23",source:"bexar"},
+  {id:"civ-8",ref:"—",agency:"Bexar County (CIVCAST)",program:"2022 Inflow Reduction Package 2A",type:"IFB",dept:"Public Works",deadline:"2026-06-23",source:"bexar"},
+  {id:"civ-9",ref:"—",agency:"Bexar County (CIVCAST)",program:"Dietz Elkhorn Road Reconstruction and Water Line",type:"IFB",dept:"Public Works",deadline:"2026-06-16",source:"bexar"},
+  {id:"civ-10",ref:"—",agency:"Bexar County (CIVCAST)",program:"2023 Water Main Replacement Project 4",type:"IFB",dept:"Public Works",deadline:"2026-06-16",source:"bexar"},
+  {id:"civ-11",ref:"—",agency:"Bexar County (CIVCAST)",program:"The Backyard at the Sally Cheever Girl Scout Leadership Center",type:"RFP",dept:"Public Works",deadline:"2026-06-12",source:"bexar"},
+  {id:"civ-12",ref:"—",agency:"Bexar County (CIVCAST)",program:"2026 Water and Sewer Unspecified Engineering Services",type:"RFQ",dept:"Public Works",deadline:"2026-06-11",source:"bexar"},
+  {id:"cps-1",ref:"7000207309",agency:"CPS Energy",program:"765 kV Howard-Solstice Transmission Line Procurement & Construction",type:"RFP",dept:"Transmission",deadline:"2026-06-11",source:"cps"},
+  {id:"cps-2",ref:"7000209031",agency:"CPS Energy",program:"Supply and Delivery of Various Aluminum Compression Sleeves — 3 Year Term",type:"IFB",dept:"Supply Chain",deadline:"2026-06-12",source:"cps"},
+  {id:"cps-3",ref:"7000208546",agency:"CPS Energy",program:"Supply and Delivery of Various Aluminum Letters and Numbers",type:"IFB",dept:"Supply Chain",deadline:"2026-06-12",source:"cps"},
+  {id:"cps-4",ref:"7000208884",agency:"CPS Energy",program:"Supply and Delivery of Various Wrenches — 3 Year Term",type:"IFB",dept:"Supply Chain",deadline:"2026-06-12",source:"cps"},
+  {id:"cps-5",ref:"7000207981",agency:"CPS Energy",program:"Managed Print Services",type:"RFP",dept:"IT",deadline:"2026-06-16",source:"cps"},
+  {id:"cps-6",ref:"7000208544",agency:"CPS Energy",program:"Hydraulic Mobile Cranes, Lattice-Boom Cranes and Heavy-Hauling Vehicles/Equipment",type:"RFP",dept:"Operations",deadline:"2026-06-22",source:"cps"},
+  {id:"cps-7",ref:"7000209153",agency:"CPS Energy",program:"Three Year-Term Contract for Sleeves",type:"IFB",dept:"Supply Chain",deadline:"2026-06-22",source:"cps"},
+  {id:"cps-8",ref:"7000207586",agency:"CPS Energy",program:"765kV Transmission and Station Design and Consulting Services",type:"RFP",dept:"Transmission",deadline:"2026-06-23",source:"cps"},
+  {id:"cps-9",ref:"7000208966",agency:"CPS Energy",program:"Supply & Delivery of Various Wires & Cables — Multi-Year Term",type:"IFB",dept:"Supply Chain",deadline:"2026-06-23",source:"cps"},
+  {id:"cps-10",ref:"7000205431",agency:"CPS Energy",program:"Utility Online Marketplace Solution Software / Services",type:"RFP",dept:"IT",deadline:"2026-06-24",source:"cps"},
+  {id:"cps-11",ref:"7000206027",agency:"CPS Energy",program:"Isolated Phase Bus Parts and Services",type:"RFP",dept:"Operations",deadline:"2026-06-29",source:"cps"},
+  {id:"cps-12",ref:"7000208502",agency:"CPS Energy",program:"Environmental Services",type:"RFP",dept:"Environmental",deadline:"2026-06-30",source:"cps"},
+  {id:"cps-13",ref:"7000208568",agency:"CPS Energy",program:"Procurement Consulting Services",type:"RFP",dept:"Procurement",deadline:"2026-07-10",source:"cps"},
+  {id:"cps-14",ref:"7900100057",agency:"CPS Energy",program:"2026 CPS Energy Standalone Battery Storage and Microgrid RFP",type:"RFP",dept:"Energy Storage",deadline:"2026-07-24",source:"cps"},
+  {id:"eaa-1",ref:"002-26-AFS",agency:"Edwards Aquifer Authority",program:"Group Life, Medical, Dental, and Long-Term Disability Coverage",type:"RFP",dept:"HR",deadline:"2026-07-02",source:"eaa"},
+  {id:"homesa-1",ref:"2605-5691",agency:"Opportunity Home SA",program:"Exterior Siding Replacement at Dietrich Road Apartments",type:"RFP",dept:"Affordable Housing Communities",deadline:"2026-06-22",source:"homesa"},
+  {id:"homesa-2",ref:"2605-5693",agency:"Opportunity Home SA",program:"Various Security Services",type:"RFP",dept:"Federal Housing Programs",deadline:"2026-06-22",source:"homesa"},
+  {id:"homesa-3",ref:"2605-5680",agency:"Opportunity Home SA",program:"RFQ Real Estate Appraisal Services",type:"RFQ",dept:"Development Services & Neighborhood Revitalization",deadline:"2026-06-23",source:"homesa"},
+  {id:"homesa-4",ref:"2605-5692",agency:"Opportunity Home SA",program:"Central Office Roof Replacement — Rebid",type:"RFP",dept:"Purchasing",deadline:"2026-06-25",source:"homesa"},
+  {id:"sara-1",ref:"00320",agency:"San Antonio River Authority",program:"CMOM Improvements Work Package 1",type:"RFP",dept:"Operations",deadline:"2026-07-02",source:"sara"},
+  {id:"sara-2",ref:"00352",agency:"San Antonio River Authority",program:"Salitrillo Aerator Replacement",type:"IFB",dept:"Engineering",deadline:"2026-07-09",source:"sara"},
+  {id:"saws-1",ref:"PS-00196-YR",agency:"SAWS",program:"2026 Water and Sewer Unspecified Engineering Services",type:"RFQ",dept:"Engineering",deadline:"2026-06-11",source:"saws"},
+  {id:"saws-2",ref:"CO-00907-RL",agency:"SAWS",program:"2023 Water Main Replacement Project 4",type:"RFCSP",dept:"Construction",deadline:"2026-06-16",source:"saws"},
+  {id:"saws-3",ref:"CO-00826-DC",agency:"SAWS",program:"2022 Inflow Reduction Package 2A",type:"IFB",dept:"Construction",deadline:"2026-06-23",source:"saws"},
+  {id:"saws-4",ref:"R-26-002-TG",agency:"SAWS",program:"Printing and Mailing Services for Lead and Copper Program",type:"RFP",dept:"Communications",deadline:"2026-06-25",source:"saws"},
+  {id:"saws-5",ref:"CO-00912-DC",agency:"SAWS",program:"EARZ Wild Springs Sewer Main Replacement Project",type:"IFB",dept:"Construction",deadline:"2026-07-09",source:"saws"},
+  {id:"saws-6",ref:"22-6502",agency:"SAWS",program:"Steven M. Clouse WRC Biosolids Upgrades",type:"Other",dept:"Engineering",deadline:"2026-08-03",source:"saws"},
+  {id:"saws-7",ref:"F-23-002-LE",agency:"SAWS",program:"Watersaver Coupon Call for Participation",type:"RFEI",dept:"Conservation",deadline:"2027-05-19",source:"saws"},
+  {id:"uth-1",ref:"RFP 745-26-P22",agency:"UT Health San Antonio",program:"Electrical Services",type:"RFP",dept:"Facilities",deadline:"2026-06-12",source:"uthscsa"},
+  {id:"uth-2",ref:"RFQ 745-26-QU02",agency:"UT Health San Antonio",program:"IDIQ Design Services — Structural Engineering",type:"RFQ",dept:"Facilities",deadline:"2026-06-12",source:"uthscsa"},
+  {id:"uth-3",ref:"RFQ 745-26-QU03",agency:"UT Health San Antonio",program:"IDIQ Design Services — Electrical Engineering",type:"RFQ",dept:"Facilities",deadline:"2026-06-12",source:"uthscsa"},
+  {id:"uth-4",ref:"RFP 745-26-P21",agency:"UT Health San Antonio",program:"Peer Support Services",type:"RFP",dept:"Behavioral Health",deadline:"2026-06-15",source:"uthscsa"},
+  {id:"uth-5",ref:"RFP 745-26-P39",agency:"UT Health San Antonio",program:"Fire Sprinkler System Services",type:"RFP",dept:"Facilities",deadline:"2026-06-22",source:"uthscsa"},
+  {id:"uth-6",ref:"RFP-745-26-P40",agency:"UT Health San Antonio",program:"SABCS Temporary Security Staffing",type:"RFP",dept:"Security",deadline:"2026-06-22",source:"uthscsa"},
+  {id:"utsa-1",ref:"743-2026-RFP-1495",agency:"UTSA",program:"San Pedro II Level 6 & 7 Build Out PP-22607963",type:"RFP",dept:"Facilities",deadline:"2026-06-30",source:"utsa"},
+  {id:"utsa-2",ref:"743-2026-RFP-1466",agency:"UTSA",program:"Park West Water Line & Access Bridge PP-22508148",type:"RFP",dept:"Facilities",deadline:"2026-06-23",source:"utsa"},
+  {id:"utsa-3",ref:"743-2026-RFP-1474",agency:"UTSA",program:"Campus-Wide Fire Sprinkler Inspection, Testing & Repair IDIQ",type:"RFP",dept:"Facilities",deadline:"2026-06-18",source:"utsa"},
+  {id:"utsa-4",ref:"743-2026-RFP-1419",agency:"UTSA",program:"Operation of Haircut Parlor and Related Services",type:"RFP",dept:"Auxiliary",deadline:"2026-06-12",source:"utsa"},
+  {id:"via-1",ref:"26-374",agency:"VIA Metro Transit",program:"Drug and Alcohol Testing",type:"RFP",dept:"Safety",deadline:"2026-06-16",source:"via"},
+  {id:"via-2",ref:"26-363",agency:"VIA Metro Transit",program:"Bus Wash Recycle Equipment Upgrade",type:"RFP",dept:"Maintenance",deadline:"2026-06-25",source:"via"},
+  {id:"via-3",ref:"26-376",agency:"VIA Metro Transit",program:"Civil Design Engineering Services IDIQ",type:"RFP",dept:"Engineering",deadline:"2026-06-30",source:"via"},
+  {id:"via-4",ref:"26-364",agency:"VIA Metro Transit",program:"VIA Trans Operations Center Warehouse Flooring",type:"IFB",dept:"Facilities",deadline:"2026-07-06",source:"via"},
+  {id:"via-5",ref:"26-360",agency:"VIA Metro Transit",program:"Heavy-Duty and General Vehicle Towing Services",type:"RFP",dept:"Operations",deadline:"2026-07-09",source:"via"},
+  {id:"via-6",ref:"26-351",agency:"VIA Metro Transit",program:"Construction Services on an IDIQ Basis",type:"IFB",dept:"Capital Projects",deadline:"2026-07-21",source:"via"},
+];
+
+const TYPE_CLASS={IFB:"t-IFB",RFP:"t-RFP",RFO:"t-RFO",RFQ:"t-RFQ",RFQS:"t-RFQS",RCSP:"t-RCSP",RFCSP:"t-RFCSP"};
+function tClass(t){return TYPE_CLASS[t]||"t-other";}
+
+function daysUntil(ds){const d=new Date(ds),n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/86400000);}
+function fmtDate(ds){return new Date(ds).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
+function getStatus(dl){const d=daysUntil(dl);if(d<0)return"Awarded";if(d<=7)return"Closing Soon";return"Open";}
+
+const BIDS=RAW.map(b=>({...b,status:getStatus(b.deadline)}));
+
+let sortCol="deadline",sortAsc=true,activeSrc="",page=1;
+const PAGE_SIZE=15;
+
+// build type filter
+const types=[...new Set(BIDS.map(b=>b.type))].sort();
+const sf=document.getElementById("sf-type");
+sf.innerHTML='<option value="">All types</option>'+types.map(t=>`<option>${t}</option>`).join("");
+
+// build source pills
+const pillWrap=document.getElementById("pills");
+const allPill=document.createElement("button");
+allPill.className="pill active";allPill.textContent="All Sources";
+allPill.onclick=()=>{activeSrc="";document.querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));allPill.classList.add("active");page=1;render();};
+pillWrap.appendChild(allPill);
+Object.entries(SOURCE_META).forEach(([id,m])=>{
+  const p=document.createElement("button");
+  p.className="pill";p.textContent=m.name;
+  p.onclick=()=>{activeSrc=id;document.querySelectorAll(".pill").forEach(x=>x.classList.remove("active"));p.classList.add("active");page=1;render();};
+  pillWrap.appendChild(p);
+});
+
+function getFiltered(){
+  const q=document.getElementById("search").value.toLowerCase();
+  const st=document.getElementById("sf-status").value;
+  const ty=document.getElementById("sf-type").value;
+  return BIDS.filter(b=>{
+    const qs=!q||b.ref.toLowerCase().includes(q)||b.agency.toLowerCase().includes(q)||b.program.toLowerCase().includes(q)||(b.dept||"").toLowerCase().includes(q);
+    return qs&&(!activeSrc||b.source===activeSrc)&&(!st||b.status===st)&&(!ty||b.type===ty);
+  });
+}
+function getSorted(arr){
+  return [...arr].sort((a,b)=>{
+    let av=a[sortCol],bv=b[sortCol];
+    if(sortCol==="deadline"){av=new Date(av);bv=new Date(bv);}
+    if(av<bv)return sortAsc?-1:1;
+    if(av>bv)return sortAsc?1:-1;
+    return 0;
+  });
+}
+function doSort(col){
+  if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
+  document.querySelectorAll("th").forEach(t=>t.classList.remove("sorted"));
+  const th=document.getElementById("th-"+col);
+  if(th)th.classList.add("sorted");
+  page=1;render();
+}
+function clearAll(){
+  document.getElementById("search").value="";
+  document.getElementById("sf-status").value="";
+  document.getElementById("sf-type").value="";
+  activeSrc="";
+  document.querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));
+  allPill.classList.add("active");
+  page=1;render();
+}
+function render(){
+  const filtered=getFiltered();
+  const sorted=getSorted(filtered);
+  const total=sorted.length;
+  const totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+  if(page>totalPages)page=1;
+  const slice=sorted.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
+  const tbody=document.getElementById("tbody");
+
+  // metrics
+  const open=BIDS.filter(b=>b.status!=="Awarded").length;
+  const closing=BIDS.filter(b=>b.status==="Closing Soon").length;
+  document.getElementById("m-active").textContent=open;
+  document.getElementById("m-closing").textContent=closing;
+
+  if(!slice.length){
+    tbody.innerHTML='<tr><td colspan="6" class="empty">No solicitations match your filters.</td></tr>';
+  } else {
+    tbody.innerHTML=slice.map(b=>{
+      const days=daysUntil(b.deadline);
+      const urgent=b.status==="Closing Soon";
+      const meta=SOURCE_META[b.source]||{name:b.source,url:"#"};
+      const sBadge=b.status==="Open"?"s-open":b.status==="Closing Soon"?"s-closing":"s-awarded";
+      const dlExtra=days>=0&&days<=30?`<div class="dl-days" style="color:${urgent?"#854f0b":"#aaa"}">${days}d remaining</div>`:"";
+      return `<tr>
+        <td><div class="ref">${b.ref}</div><div class="src">${meta.name}</div></td>
+        <td><div class="prog" title="${b.program}">${b.program}</div><div class="dept">${b.dept||""}</div></td>
+        <td><span class="badge ${sBadge}">${b.status}</span></td>
+        <td><span class="badge ${tClass(b.type)}">${b.type}</span></td>
+        <td><div class="dl${urgent?" urgent":""}">${fmtDate(b.deadline)}</div>${dlExtra}</td>
+        <td><div class="actions">
+          <a class="btn-bid" href="${meta.url}" target="_blank" rel="noopener">View Bid</a>
+          <a class="btn-portal" href="${meta.url}" target="_blank" rel="noopener">&#x2197; Portal</a>
+        </div></td>
+      </tr>`;
+    }).join("");
+  }
+
+  document.getElementById("count-lbl").textContent=`Showing ${Math.min((page-1)*PAGE_SIZE+1,total)}–${Math.min(page*PAGE_SIZE,total)} of ${total} solicitation${total!==1?"s":""}`;
+
+  const pgWrap=document.getElementById("pagination");
+  pgWrap.innerHTML="";
+  for(let i=1;i<=totalPages;i++){
+    const b=document.createElement("button");
+    b.className="pg"+(i===page?" active":"");
+    b.textContent=i;
+    b.onclick=(p=>()=>{page=p;render();})(i);
+    pgWrap.appendChild(b);
+  }
+}
+
+document.getElementById("th-deadline").classList.add("sorted");
+render();
+</script>
+</body>
+</html>
