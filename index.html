@@ -102,7 +102,7 @@ tr:hover td{background:#fafaf8}
   <div class="pills" id="pills"></div>
 
   <div class="filters">
-    <input type="text" id="search" placeholder="Search by keyword, agency, ref #, department…" oninput="render()"/>
+    <input type="text" id="search" placeholder="Search by keyword, agency, ref #, department…" oninput="page=1;render()"/>
     <select id="sf-status" onchange="render()">
       <option value="">All statuses</option>
       <option>Open</option><option>Closing Soon</option><option>Awarded</option>
@@ -237,7 +237,6 @@ const RAW=[
   {id:"via-6",ref:"26-351",agency:"VIA Metro Transit",program:"Construction Services on an IDIQ Basis",type:"IFB",dept:"Capital Projects",deadline:"2026-07-21",source:"via"},
 ];
 
-document.addEventListener("DOMContentLoaded", function() {
 const TYPE_CLASS={IFB:"t-IFB",RFP:"t-RFP",RFO:"t-RFO",RFQ:"t-RFQ",RFQS:"t-RFQS",RCSP:"t-RCSP",RFCSP:"t-RFCSP"};
 function tClass(t){return TYPE_CLASS[t]||"t-other";}
 
@@ -355,7 +354,6 @@ function render(){
 
 document.getElementById("th-deadline").classList.add("sorted");
 render();
-}); // end DOMContentLoaded
 </script>
 </body>
 </html>
