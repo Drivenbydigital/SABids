@@ -332,8 +332,7 @@ function render(){
         <td><span class="badge ${tClass(b.type)}">${b.type}</span></td>
         <td><div class="dl${urgent?" urgent":""}">${fmtDate(b.deadline)}</div>${dlExtra}</td>
         <td><div class="actions">
-          <a class="btn-bid" href="${meta.url}" target="_blank" rel="noopener">View Bid</a>
-          <a class="btn-portal" href="${meta.url}" target="_blank" rel="noopener">&#x2197; Portal</a>
+          <a class="btn-bid" href="${meta.url}" target="_blank" rel="noopener">&#x2197; View Portal</a>
         </div></td>
       </tr>`;
     }).join("");
